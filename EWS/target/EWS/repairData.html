@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>维修日志</title>
+    <link rel="stylesheet" href="layui3.4/css/layui.css"/>
+    <script type="text/javascript" src="jquery3.4.1/jquery-3.4.1.js"></script>
+    <script type="text/javascript" src="layui3.4/layui.all.js"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            loadRepData();
+            if(sessionStorage.getItem("uname")==null){
+                layer.msg("非法用户，请登录!");
+                // setInterval("window.location.href=\"index.html\"",3000);
+            }else{
+                var uname=sessionStorage.getItem("uname");
+                $("#loginName").html(uname);
+            }
+        });
+
+        function loadRepData() {
+            var table = layui.table;
+            var util = layui.util;
+            table.render({
+                toolbar: "#toolbar",
+                elem: "#repInfoList",
+                url: "equ/rep/findAllEquRepLog.do",
+                title: "用户信息表",
+                id: "repInfoTable",
+                limit: 10,
+                page: true,
+                event: true,
+                size: "md",
+                limits: [10, 20, 50, 100],
+                loading: true,
+                cols: [
+                    [{
+                        field: "r_id",
+                        title: "ID",
+                        type: "checkbox"
+                    },
+                        {
+                            field: "r_id",
+                            title: "ID",
+                            type: "numbers",
+                            width: 20
+                        },
+                        {
+                            field: "snumber",
+                            title: "序列号",
+                            align: "center",
+                            width: 100
+                        },
+                        {
+                            field: "iname",
+                            title: "设备名称",
+                            align: "center",
+                            width: 100
+                        },
+                        {
+                            field: "itype",
+                            title: "设备类型",
+                            align: "center",
+                            width: 150
+                        },
+                        {
+                            field: "dept",
+                            title: "部署科室",
+                            align: "center",
+                            width: 150
+                        },
+                        {
+                            field: "iproducetime",
+                            title: "设备生产时间",
+                            align: "center",
+                            width: 180,
+                            templet: function (row) {
+                                return util.toDateString(row.iproducetime, "yyyy-MM-dd HH:mm:ss");
+                            }
+                        },
+                        {
+                            field: "pastrepair",
+                            title: "上一次维修时间",
+                            align: "center",
+                            width: 180,
+                            templet: function (row) {
+                                return util.toDateString(row.pastrepair, "yyyy-MM-dd HH:mm:ss");
+                            }
+                        },
+                        {
+                            field: "reptime",
+                            title: "维修时间",
+                            align: "center",
+                            width: 180,
+                            templet: function (row) {
+                                return util.toDateString(row.reptime, "yyyy-MM-dd HH:mm:ss");
+                            }
+                        },
+                        {
+                            field: "repairpeople",
+                            title: "维修人",
+                            align: "center",
+                            width: 150
+                        }
+                    ]
+                ]
+            });
+            layui.table.on("toolbar(repTable)", function (rs) {
+                var event = rs.event;
+                /*if (event == "add") {
+                    layer.open({
+                        type: 1,
+                        title: "添加用户信息",
+                        btn: ["确认添加", "取消"],
+                        content: $("#editUserInfo").html(),
+                        area: ['400px', '350px'],
+                        yes: function (index) {
+                            layer.msg("test");
+                        },
+                        success: function () {
+                            $("#lbl_title").html("添加用户信息");
+                            layui.use("form", function () {
+                                layui.form.render();
+                            })
+                        }
+                    });
+                }*/
+                if (event == "delete") {
+                    var list = layui.table.checkStatus("repInfoTable").data;
+                    if (list.length == 0) {
+                        layer.msg("请选择一条数据");
+                    } else {
+                        layer.confirm("是否删除选中的数据?", {btn: ["确定", "取消"]}, function () {
+                            layer.closeAll();
+                            var arr = new Array();
+                            $.each(list, function (index, row) {
+                                arr[index] = row.snumber;
+                            });
+                            $.ajax({
+                                url: "equ/rep/deleteRepLogInfoBySnumber.do",
+                                data: {"snumber": arr.join(",").toString()},
+                                method: "post",
+                                success: function (result) {
+                                    if (JSON.parse(result) == "success") {
+                                        layer.msg("删除成功！");
+                                        layui.table.reload("repInfoTable");
+                                    } else
+                                        layer.msg("删除失败！");
+
+                                },
+                                error: function () {
+                                    layer.msg("请求服务器失败?");
+                                }
+                            });
+                        })
+                    }
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+<div class="layui-elem-quote">
+    维修日志 <a id="loginName"></a>
+</div>
+<script type="text/html" id="toolbar">
+    <!--    <button class="layui-btn layui-btn-danger" lay-event="add"><i class="layui-icon">&#xe640</i> 添加维修记录</button>-->
+    <a href="javascript:void(0)" class="layui-btn layui-btn-warm" lay-event="delete"><span
+            class="layui-icon layui-icon-delete"></span> 删除维修记录</a>
+    <!--  <input class="layui-input-block" type="text" placeholder="请输入要查询的信息">
+      <a href="" class="layui-btn layui-btn-warm">
+          <span class="layui-icon layui-icon-search"></span></a>-->
+</script>
+<table class="layui-table" id="repInfoList" lay-filter="repTable">
+</table>
+
+</body>
+</html>

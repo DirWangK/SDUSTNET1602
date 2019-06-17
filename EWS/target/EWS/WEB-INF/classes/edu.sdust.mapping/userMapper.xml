@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="edu.sdust.mapping.userMapper">
+    <select id="login" parameterType="map" resultType="map">
+        select * from tb_user where uname=#{uname}  and upwd=md5(#{upwd});
+
+    </select>
+
+    <select id="returnRole" parameterType="map" resultType="map">
+        select role from tb_user where uname=#{uname};
+    </select>
+
+    <select id="select" parameterType="string" resultType="map">
+        select * from tb_user where uname=#{uname};
+    </select>
+
+    <update id="updateLoginTime" parameterType="string">
+        update tb_user set lastLoginTime=now() where uname=#{uname};
+    </update>
+    <insert id="register" parameterType="map">
+        insert into tb_user(id,uname,upwd,email,role,registerTime,lastLoginTime)
+        values (null,#{uname},md5(#{upwd}),#{email},'employee',now(),now());
+    </insert>
+
+    <select id="findAllUser" parameterType="map" resultType="map">
+        select * from tb_user limit #{page},#{pageSize}
+    </select>
+    <select id="findUserCount" resultType="map">
+        SELECT count(*) as `count` from tb_user;
+    </select>
+    <delete id="deleteUserInfoById" parameterType="int">
+        DELETE FROM tb_user WHERE id=#{id};
+    </delete>
+    <select id="userTotal" resultType="map">
+        select case
+        when role='employee' then '部门员工'
+        when role='admin' then '管理员'
+        when role='checker' then '检修员'
+        end as role
+        ,count(*) as count from tb_user GROUP BY role;
+    </select>
+    <update id="editPwd" parameterType="map" >
+        update tb_user set upwd=md5(#{pwd}) where uname=#{uname} ;
+    </update>
+</mapper>

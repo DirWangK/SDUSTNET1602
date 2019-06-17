@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="edu.sdust.mapping.equRepMapper">
+    <select id="findAllEquRep" parameterType="map" resultType="map">
+        select * from tb_equ limit #{page},#{pageSize};
+    </select>
+    <select id="findAllEquNeedRep" parameterType="map" resultType="map">
+        select * from tb_equ where datediff(now(),latestrepairtime)>substring_index(repaircycle, '天', 1) limit #{page},#{pageSize};
+    </select>
+    <select id="findEquRepCount" resultType="map">
+        SELECT count(*) as `count` from tb_equ;
+    </select>
+
+    <update id="creatNeedRepView">
+            CREATE OR REPLACE VIEW needrep AS select * from tb_equ where datediff(now(),latestrepairtime)>substring_index(repaircycle, '天', 1);
+    </update>
+
+    <select id="findEquNeedRepCount" resultType="map">
+        SELECT count(*) as `count` from needrep;
+    </select>
+
+    <update id="updateLatestrepairtime" parameterType="string">
+        update tb_equ set latestrepairtime=now() where snumber=#{snumber};
+    </update>
+
+    <insert id="equInsRepLog" parameterType="map">
+        INSERT INTO tb_rep(snumber,iname,itype,dept,iproducetime,pastrepair,reptime,repairpeople) VALUES(#{snumber}, #{iname}, #{itype}, #{dept}, #{iproducetime},  #{latestrepairtime},NOW(),#{repairpeople}) ON DUPLICATE KEY UPDATE snumber=#{snumber};
+    </insert>
+
+    <select id="findAllEquRepLog" parameterType="map" resultType="map">
+        select * from tb_rep limit #{page},#{pageSize};
+    </select>
+    <select id="findEquRepCountLog" resultType="map">
+        SELECT count(*) as `count` from tb_rep;
+    </select>
+
+    <delete id="deleteRepLogInfoBySnumber" parameterType="string">
+        DELETE FROM tb_rep WHERE snumber=#{snumber};
+    </delete>
+</mapper>

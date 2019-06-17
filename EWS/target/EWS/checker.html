@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>预警系统后台管理</title>
+    <link rel="stylesheet" href="layui3.4/css/layui.css"/>
+    <script type="text/javascript" src="jquery3.4.1/jquery-3.4.1.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            if(sessionStorage.getItem("uname")==null){
+                layer.msg("非法用户，请登陆");
+                setInterval("window.location.href=\"index.html\"",3000);
+            }else{
+                var uname=sessionStorage.getItem("uname");
+                $("#loginName").html(uname);
+            }
+
+        });
+        function loadEquRepairPage() {
+            $("#mainFrame").load("equRepair.html");
+        }
+
+        function loadrepairDataPage() {
+            $("#mainFrame").load("repairData.html");
+        }
+        function loadUsermanagerPage() {
+            $("#mainFrame").load("userManager.html");
+        }
+        function loadjurisdiction() {
+
+            $("#mainFrame").load("jurisdiction.html");
+        }
+        function loadAnalysisPage() {
+            $("#mainFrame").load("analysis.html");
+        }
+        function exit() {
+            layer.confirm("是否真的要退出系统?",{title:"退出提示",btn:["残忍离开","继续使用"]},function (index) {
+                sessionStorage.clear();
+                window.location.href="index.html";
+
+            })
+        }
+        function uploadphoto() {
+            window.location.href="uploadImage.html";
+        }
+        function editpwd() {
+            layer.open({
+                type: 2
+                , title: '修改密码'
+                , content: 'editPwd.html'
+                , maxmin: true
+                , area: ['500px', '450px']
+                , btn: ['确定', '取消']
+                , yes: function (index, layero) {
+                    var x=sessionStorage.getItem("uname");
+                    layer.msg(x)
+                }
+                , success: function (layero, index) {
+
+                    // 方式一  其实就是获取的 子页面的 div
+                    var div = layero.find('iframe').contents().find('#useradmin');  // div.html() div里面的内容,不包含当前这个div
+
+                    // 方式二
+                    var body = layer.getChildFrame('body', index);  // body.html() body里面的内容
+
+
+                    /* ---- 附加内容 看看就好  Begin ---- */
+                    var iframeWindow = window['layui-layer-iframe' + index]   // 方式一： 得到iframe页的窗口对象
+                    var iframeWindow = window[layero.find('iframe')[0]['name']];   // 方式二： 得到iframe页的窗口对象
+                    /* ---- 附加内容 看看就好  End ---- */
+
+                    // 测试 ：
+                    body.find("#username").val("admin");  // 方式一
+
+                    div.find("#username").val("admin");  // 方式二
+                }
+            });}
+    </script>
+
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo">医疗设备预警系统管理</div>
+        <!--  &lt;!&ndash; 头部区域（可配合layui已有的水平导航） &ndash;&gt;
+          <ul class="layui-nav layui-layout-left">
+              <li class="layui-nav-item"><a href="">控制台</a></li>
+              <li class="layui-nav-item"><a href="">商品管理</a></li>
+              <li class="layui-nav-item"><a href="">用户</a></li>
+              <li class="layui-nav-item">
+                  <a href="javascript:;">其它系统</a>
+                  <dl class="layui-nav-child">
+                      <dd><a href="">邮件管理</a></dd>
+                      <dd><a href="">消息管理</a></dd>
+                      <dd><a href="">授权管理</a></dd>
+                  </dl>
+              </li>
+          </ul>-->
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:uploadphoto();">
+                    <img src="http://t.cn/RCzsdCq" class="layui-nav-img">
+                    <label id="loginName"></label>
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a href="javascript:editpwd()"><span class="layui-icon layui-icon-auz"></span> 个人中心</a></dd>
+                    <dd><a href="javascript:editpwd()"><span class="layui-icon layui-icon-password"></span> 修改密码</a></dd>
+                </dl>
+            </li>
+            <li class="layui-nav-item"><a href="javaScript:exit()">退出</a></li>
+        </ul>
+    </div>
+
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <ul class="layui-nav layui-nav-tree"  lay-filter="test">
+
+                <li class="layui-nav-item layui-nav-itemed">
+                    <a href="javascript:;"><span class="layui-icon layui-icon-user"></span> 检修管理</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:loadEquRepairPage();"><span class="layui-icon layui-icon-user"></span> 设备检修</a></dd>
+                        <dd><a href="javascript:loadrepairDataPage();"><span class="layui-icon layui-icon-user"></span> 检修日志</a></dd>
+                    </dl>
+                </li>
+               <!-- <li class="layui-nav-item layui-nav-itemed">
+                    <a href="javascript:;"><span class="layui-icon layui-icon-user"></span> 系统管理</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:loadjurisdiction();"> <span class="layui-icon layui-icon-user"></span> 权限分配</a></dd>
+                        <dd><a href="javascript:;"><span class="layui-icon layui-icon-user"></span> 注销系统</a></dd>
+                    </dl>
+                </li>-->
+
+            </ul>
+        </div>
+    </div>
+
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <div id="mainFrame" style="padding: 15px;">内容主体区域</div>
+    </div>
+
+    <div class="layui-footer">
+        <!-- 底部固定区域 -->
+        &copy;2018-2019 融创软通科技股份
+    </div>
+</div>
+<script src="layui3.4/layui.all.js"></script>
+<script>
+    //JavaScript代码区域
+    layui.use('element', function(){
+        var element = layui.element;
+
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>维修管理</title>
+    <link rel="stylesheet" href="layui3.4/css/layui.css"/>
+    <script type="text/javascript" src="jquery3.4.1/jquery-3.4.1.js"></script>
+    <script type="text/javascript" src="layui3.4/layui.all.js"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            loadEquData();
+        });
+
+        function openEquRep(snumber, iname, itype, dept, iproducetime, latestrepairtime) {
+            /*            sessionStorage.setItem("id",id);
+                        sessionStorage.setItem("uname",uname);
+                        sessionStorage.setItem("role",role);
+                        sessionStorage.setItem("email",email);*/
+            /*layer.confirm("是否真的要检修本设备?", {icon: 3, title: "警告"}, function (index) {
+                layer.closeAll();*/
+            var uname=sessionStorage.getItem("uname");
+            // alert(uname);
+                $.ajax({
+                    url: "equ/rep/equRepAddLog.do",
+                    method: "post",
+                    data: {
+                        "snumber":(snumber),
+                        "iname":(iname),
+                        "itype":(itype),
+                        "dept":(dept),
+                        "iproducetime":iproducetime,
+                        "latestrepairtime":latestrepairtime,
+                        "uname":uname
+                    }
+                    , success: function (result) {
+                        if (JSON.parse(result) == "success")
+                            layer.msg("添加Log成功");
+                        else
+                            layer.msg("添加Log失败");
+                    }
+                    , error: function () {
+                        layer.msg("请求服务器error");
+                    }
+                });
+                $.ajax({
+                    url: "equ/rep/equRepUpdate.do",
+                    method: "post",
+                    data: {"snumber": snumber},
+                    success: function (result) {
+                        //alert(result);
+                        if (JSON.parse(result) == "success") {
+                            // $("#equInfoList").reload();
+
+                            layer.msg("检修成功!");
+                            layui.table.reload("equInfoTable");
+
+
+                        } else {
+                            layer.msg("检修失败!");
+                        }
+
+                    },
+                    error: function () {
+                        layui.msg("请求服务器失败!");
+                    }
+                });
+
+            // });
+        }
+
+
+
+        function loadEquData() {
+            var table = layui.table;
+            var util = layui.util;
+            table.render({
+                toolbar: "#toolbar",
+                elem: "#equInfoList",
+                url: "equ/rep/findAllEquNeedRep.do",
+                // url: "equ/rep/findAllEquRep.do",
+                title: "维修信息表",
+                id: "equInfoTable",
+                limit: 10,
+                page: true,
+                event: true,
+                size: "md",
+                limits: [10, 20, 50, 100],
+                loading: true,
+                cols: [
+                    [{
+                        field: "e_id",
+                        title: "ID",
+                        type: "checkbox"
+                    },
+                        {
+                            field: "e_id",
+                            title: "ID",
+                            type: "numbers",
+                            width: 20
+                        },
+                        {
+                            field: "snumber",
+                            title: "设备id",
+                            align: "center",
+                            width: 100
+                        },
+                        {
+                            field: "iname",
+                            title: "设备名",
+                            align: "center",
+                            width: 100,
+                        },
+                        {
+                            field: "itype",
+                            title: "设备类型",
+                            align: "center",
+                            width: 150
+                        },
+                        {
+                            field: "iproducetime",
+                            title: "设备生产时间",
+                            align: "center",
+                            width: 180,
+                            templet: function (row) {
+                                return util.toDateString(row.iproducetime, "yyyy-MM-dd HH:mm:ss");
+                            }
+                        },
+                        {
+                            field: "istarttime",
+                            title: "设备开始使用时间",
+                            align: "center",
+                            width: 150,
+                            templet: function (row) {
+                                return util.toDateString(row.istarttime, "yyyy-MM-dd HH:mm:ss");
+                            }
+                        },
+                        {
+                            field: "repaircycle",
+                            title: "检修周期",
+                            align: "center",
+                            width: 150
+                        },
+                        {
+                            field: "latestrepairtime",
+                            title: "最后一次维修时间",
+                            align: "center",
+                            width: 180,
+                            templet:
+                                function (row) {
+                                    return util.toDateString(row.latestrepairtime, "yyyy-MM-dd HH:mm:ss");
+                                    //     return showTime(row.latestrepairtime);
+                                }
+                        },
+                        /* {
+                            field: "rcount",
+                            title: "维修次数",
+                            align: "center",
+                            width: 150
+                        },*/
+                        {
+                            field: "istate",
+                            title: "设备状态",
+                            align: "center",
+                            width: 150,
+                            templet:function (row) {
+                                if(row.istate=="正常")
+                                    return "待检修";
+                            }
+                        },
+                        {
+                            field: "id",
+                            title: "操作",
+                            align: "center",
+                            width: 100,
+                            templet: function (row) {
+                                /* var arr = new Array();
+                                arr[0] = row.id;
+                                arr[1] = row.uname;
+                                arr[2] = row.email;
+                                arr[3] = row.role;*/
+                                // '," + row.dept + "'
+                                var edit = '<a href="javascript:openEquRep(' + "'" + row.snumber + "','" + row.iname + "','" + row.itype + ",'" + row.dept + '\');"  title="检修">' +
+                                    "<span style='font-size: 25px;color:blue' class='layui-icon layui-icon-util'></span></a>";
+                                var del = '<a href="javaScript:deleteUserInfoById(' + row.id + ')"  title="删除">' +
+                                    "<span style='font-size: 25px;color: red' class='layui-icon layui-icon-delete'></span></a>";
+
+                                // "'"+row.snumber+"','"
+                                return "<a href=\"javascript:openEquRep(" + "'" + row.snumber + "','" + row.iname + "','" + row.itype + "','" + row.dept + "','" + row.iproducetime + "','" + row.latestrepairtime + "');\" title=\"检修\"><span style=\"font-size: 25px;color:blue\" class=\"layui-icon layui-icon-util\"></span></a>";
+                                // return edit;
+                            }
+                        }
+                    ]
+                ]
+            });
+            /*layui.table.on("toolbar(equTable)", function (rs) {
+                var event = rs.event;
+                /!*if (event == "add") {
+                    layer.open({
+                        type: 1,
+                        title: "添加用户信息",
+                        btn: ["确认添加", "取消"],
+                        content: $("#editUserInfo").html(),
+                        area: ['400px', '350px'],
+                        yes: function (index) {
+                            layer.msg("test");
+                        },
+                        success: function () {
+                            $("#lbl_title").html("添加用户信息");
+                            layui.use("form", function () {
+                                layui.form.render();
+                            })
+                        }
+                    });
+                }*!/
+                if (event == "delete") {
+                    var list = layui.table.checkStatus("equInfoTable").data;
+                    if (list.length == 0) {
+                        layer.msg("请选择一条数据");
+                    } else {
+                        layer.confirm("是否删除选中的数据?", {btn: ["确定", "取消"]}, function () {
+                            layer.closeAll();
+                            var arr = new Array();
+                            $.each(list, function (index, row) {
+                                arr[index] = row.id;
+                            });
+                            $.ajax({
+                                url: "equ/rep/deleteRepLogInfoBySnumber.do",
+                                data: {"snumber": arr.join(",").toString()},
+                                method: "post",
+                                success: function (result) {
+                                    if (JSON.parse(result) == "success") {
+                                        layer.msg("删除成功！");
+                                        layui.table.reload("userInfoTable");
+                                    } else
+                                        layer.msg("删除失败！");
+
+                                },
+                                error: function () {
+                                    layer.msg("请求服务器失败?");
+                                }
+                            });
+                        })
+                    }
+                }
+            });*/
+        }
+    </script>
+</head>
+<body>
+<div class="layui-elem-quote">
+    设备维修管理
+</div>
+<!--<script type="text/html" id="toolbar">
+&lt;!&ndash;    <button class="layui-btn layui-btn-danger" lay-event="add"><i class="layui-icon">&#xe640</i> 添加维修记录</button>&ndash;&gt;
+    <a href="javascript:void(0)" class="layui-btn layui-btn-warm" lay-event="delete"><span
+            class="layui-icon layui-icon-delete"></span> 删除维修记录</a>
+  &lt;!&ndash;  <input class="layui-input-block" type="text" placeholder="请输入要查询的信息">
+    <a href="" class="layui-btn layui-btn-warm">
+        <span class="layui-icon layui-icon-search"></span></a>&ndash;&gt;
+</script>-->
+<table class="layui-table" id="equInfoList" lay-filter="equTable">
+</table>
+<div align="center" id="editEquInfo" style="display: none;width: 300px">
+    <br>
+    <center>
+        <h2 id="lbl_title">修改维修信息</h2>
+    </center>
+    <hr>
+    <form class="layui-form" id="form1">
+        <input type="hidden" id="id">
+    </form>
+</div>
+</body>
+</html>
